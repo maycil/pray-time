@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+   <style> 
+	#list { width: 210px; }
+	#list span{ float:left;width: 50%; height:20px; }
+	
+    </style>
+ <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+   integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+   crossorigin=""></script>
+   <title>Pray Time Application</title>
+  </head>
+  <body>
+	<div id="mapid" style="width: 100%; height: 400px;"></div>
+<div id="list" style="display:none">
+<span>Time</span>
+<span id="time"></span>
+<hr/>
+<span>Timezone</span>
+<span id="timezone"></span>
+<hr/>
+<span>Region</span>
+<span id="timezoneId"></span>
+<hr/>
+<span>Fajr End Time</span>
+<span id="fajrEndTime"></span>
+<hr/>
+<span>Tulu Time</span>
+<span id="tuluTime"></span>
+<hr/>
+<span>Asr Time</span>
+<span id="asrTime"></span>
+<hr/>
+<span>Maghrib Time</span>
+<span id="maghribTime"></span> 
+<hr/>
+</div>
+<script>
+
+	var mymap = L.map('mapid').setView([41.005, 28.9], 10);
+
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox.streets'
+	}).addTo(mymap);
+	
+	var popup = L.popup();
+
+	function onMapClick(e) {
+	console.log(e);
+		
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+		   // Typical action to be performed when the document is ready:
+			var response = JSON.parse(xhttp.responseText)
+			document.getElementById("time").innerHTML = response.time;
+			document.getElementById("timezoneId").innerHTML = response.timezoneId;
+			document.getElementById("timezone").innerHTML = + response.dstOffset;
+			calculateTime(e.latlng.lat, e.latlng.lng,response.dstOffset)
+		}
+	};
+	xhttp.open("GET", "http://api.geonames.org/timezoneJSON?lat="+e.latlng.lat+"&lng="+e.latlng.lng+"&username=aycilm", true);
+
+	xhttp.send();
+	
+	
+	popup.setLatLng(e.latlng)
+		.setContent(" <h4>Pray Time</h4><div id='list'>" + document.getElementById("list").innerHTML + "</div>")
+		.openOn(mymap);
+	}
+
+	mymap.on('click', onMapClick);
+
+	function dayOfYear(){
+		var now = new Date();
+		var start = new Date(now.getFullYear(), 0, 0);
+		var diff = now - start;
+		var oneDay = 1000 * 60 * 60 * 24;
+		var day = Math.floor(diff / oneDay);
+		console.log('Day of year: ' + day);
+		return day;
+	}
+	
+	function calculateTime(latitude, longitude, timezone){
+	
+		/* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
+		var sina=  360/365 * (dayOfYear() - 81 + 4) ; 
+		console.log("sina " + sina);
+		//https://stormconsultancy.co.uk/blog/development/code-snippets/convert-an-angle-in-degrees-to-radians-in-c/
+		
+		/*declination calculation*/
+		declination = 23.45 *  Math.sin(degToRad(sina));
+		console.log("declination " + declination);
+		
+		console.log("latitude " + latitude);
+		if(Math.abs(latitude) >  23.45 *2){
+			//latitude = latitude - declination;
+			console.log("latitude " + latitude);
+		}
+		//calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
+		var B = degToRad(360/365 * ( dayOfYear() - 81 + 4)); 
+		var EoT = 9.87 * Math.sin(2*B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+		console.log("EoT " + EoT);
+        var lstm = 15 * timezone;
+        var tc = 4*(longitude - lstm) + EoT;
+
+		console.log("tc " + tc);
+		//tc =0;
+	
+		var Acos = (-1 * Math.tan(degToRad(latitude)) * Math.tan(degToRad(declination)));
+		console.log("Acos " + Acos);
+		/*for math.acos* -1<x<1 */
+		 Acos = Acos - Math.trunc(Acos);
+		console.log("Acos " + Acos);
+		console.log("Math.Tan(latitude) " + Math.tan(degToRad(latitude)));
+		console.log("Math.Tan(declination) " +  Math.tan(degToRad(declination)));
+		console.log("Acos " + Acos);
+		console.log("Math.Acos Rad : " + Math.acos(Acos));
+		console.log("Math.Acos Degree : " +  radToDeg(Math.acos(Acos)));
+		
+		//sunrise https://pveducation.org/pvcdrom/properties-of-sunlight/elevation-angle
+		// *(180/Math.PI) https://stackoverflow.com/questions/27351123/math-acos-not-working
+		riseTimeGMT = 12 - radToDeg(Math.acos(Acos))/15  - tc/60; 
+		setTimeGMT = 12 + radToDeg(Math.acos(Acos))/15  - tc/60;
+		
+		console.log("riseTimeGMT : " + riseTimeGMT);
+		console.log("setTimeGMT : " + setTimeGMT);
+		document.getElementById("fajrEndTime").innerHTML = DecimalToHour(riseTimeGMT);
+		document.getElementById("tuluTime").innerHTML = tuluTime(riseTimeGMT,setTimeGMT);
+		document.getElementById("asrTime").innerHTML = asrTime(riseTimeGMT,setTimeGMT);
+		document.getElementById("maghribTime").innerHTML = DecimalToHour(setTimeGMT);
+		console.log("riseTimeLST HOUR " + DecimalToHour(riseTimeGMT) );
+		console.log("setTimeLST HOUR " + DecimalToHour(setTimeGMT) );
+	 
+	}
+	
+	function tuluTime(riseTimeGMT,setTimeGMT)
+	{
+		return DecimalToHour((riseTimeGMT+setTimeGMT)/2);
+	}
+	
+	function asrTime(riseTimeGMT,setTimeGMT)
+	{
+		var tuluTime = (riseTimeGMT+setTimeGMT)/2;
+		return DecimalToHour((tuluTime+setTimeGMT)/2);
+	}
+	
+	function DecimalToHour(value)
+	{
+		var hour = Math.trunc(value);
+		var remain = (value - hour) * 60;
+		var mninute = Math.trunc(remain);
+		var seconds = (remain - mninute) * 60;
+		return hour + ":" + mninute + ":" + seconds.toFixed(0);
+	}
+	
+	function radToDeg(angleRad)
+	{
+		return (180 * angleRad / Math.PI);
+	}
+
+	function degToRad(angleDeg)
+	{
+		return (Math.PI * angleDeg / 180);
+	}
+</script>
+
+  </body>
+</html>
