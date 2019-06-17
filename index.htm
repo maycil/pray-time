@@ -6,6 +6,7 @@
     <meta name="keywords" content="Pray Time Application V 0.1.0" />
     <meta name="description" content="Experimental Pray Time Application V 0.1.0" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src https://*; child-src 'none';">
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
    crossorigin=""/>
@@ -52,6 +53,9 @@
 <span>Maghrib Time</span>
 <span id="maghribTime"></span> 
 <hr/>
+<span>Full Year Time</span>
+<span id="fullyear"></span> 
+<hr/>
 </div>
 <script>
 
@@ -77,7 +81,9 @@
 			var response = JSON.parse(xhttp.responseText)
 			document.getElementById("time").innerHTML = response.time;
 			document.getElementById("timezoneId").innerHTML = response.timezoneId;
-			document.getElementById("timezone").innerHTML = + response.dstOffset;
+			document.getElementById("timezone").innerHTML =  response.dstOffset;
+			document.getElementById("fullyear").innerHTML = "<a href='fullyear.htm?latitude="+e.latlng.lat+"&longitude="+e.latlng.lng+"&dstOffset="+response.dstOffset+"&timezone="+response.timezone+"&timezoneId="+response.timezoneId+"' target='_blank'>Open</a>";
+			
 			calculateTime(e.latlng.lat, e.latlng.lng,response.dstOffset)
 		}
 	};
@@ -106,7 +112,7 @@
 	function calculateTime(latitude, longitude, timezone){
 	
 		/* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
-		var sina=  360/365 * (dayOfYear() - 81 + 4) ; 
+		var sina=  360/365 * (dayOfYear() - 81) ; 
 		console.log("sina " + sina);
 
 		
@@ -120,7 +126,7 @@
 			console.log("latitude " + latitude);
 		}
 		//calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
-		var B = degToRad(360/365 * ( dayOfYear() - 81 + 4)); 
+		var B = degToRad(360/365 * ( dayOfYear() - 81)); 
 		var EoT = 9.87 * Math.sin(2*B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
 		console.log("EoT " + EoT);
         var lstm = 15 * timezone;
