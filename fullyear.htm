@@ -38,11 +38,9 @@
 	var longitude = urlParams.get('longitude');
 	var dstOffset = urlParams.get('dstOffset');
 	var timezone = urlParams.get('timezone');
-	var timezoneId = urlParams.get('timezoneId');
-	var lat = urlParams.get('lat');
-	var lng = urlParams.get('lng');
+	var timezoneId = urlParams.get('timezoneId'); 
 
-	var text = "<table id='timetable'><tr><td>Date</td><td>DayOfYear</td><td>Fajr End Time</td><td>Tulu Time</td><td>Asr Time</td><td>Maghrib Time</td><td>Declination</td><td>EoT</td><td>TC</td><td>Math.Acos (d)</td></tr>";
+	var text = "<table id='timetable'><tr><td>Date</td><td>DayOfYear</td><td>Fajr End Time</td><td>Tulu Time</td><td>Asr Time</td><td>Maghrib Time</td><td>Declination</td><td>EoT</td><td>Day Length</td></tr>";
 	if(timezone !== dstOffset){
 		text = "<h3>Please consider for day light saving (DST)!</h3>" + text;
 	} 
@@ -53,7 +51,7 @@
 	}
 	text += "</table>";
 	document.getElementById("timelist").innerHTML = text;
-	document.getElementById("timezone").innerHTML = "timezone :" +  timezone + " latitude - longitude : " + lat +" - " + lng;
+	document.getElementById("timezone").innerHTML = "timezone :" +  timezone + " latitude - longitude : " + latitude +" - " + longitude;
 	document.getElementById("timezoneId").innerHTML = timezoneId;
 	
 	function dayOfYear(calculateDate){
@@ -70,46 +68,23 @@
 		/* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
 		var sina=  360/365 * (dayOfYear(calculateDate) - 81) ; 
 		console.log("sina " + sina);
-
-		
 		/*declination calculation*/
 		declination = 23.45 *  Math.sin(degToRad(sina));
-		console.log("declination " + declination);
+		console.log("declination " + declination); 
 		
-		console.log("latitude " + latitude);
-		if(Math.abs(latitude) >  23.45 *2){
-			//latitude = latitude - declination;
-			console.log("latitude " + latitude);
-		}
 		//calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
 		var B = degToRad(360/365 * ( dayOfYear(calculateDate) - 81)); 
 		var EoT = 9.87 * Math.sin(2*B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
 		console.log("EoT " + EoT);
         var lstm = 15 * timezone;
         var tc = 4*(longitude - lstm) + EoT;
-
-		console.log("tc " + tc);
-		//tc =0;
-	
-		var Acos = (-1 * Math.tan(degToRad(latitude)) * Math.tan(degToRad(declination)));
-		console.log("Acos " + Acos);
-		/*for math.acos* -1<x<1 */
-		 Acos = Acos - Math.trunc(Acos);
-		console.log("Acos " + Acos);
-		console.log("Math.Tan(latitude) " + Math.tan(degToRad(latitude)));
-		console.log("Math.Tan(declination) " +  Math.tan(degToRad(declination)));
-		console.log("Acos " + Acos);
-		console.log("Math.Acos Rad : " + Math.acos(Acos));
-		console.log("Math.Acos Degree : " +  radToDeg(Math.acos(Acos)));
-		
-		//sunrise https://pveducation.org/pvcdrom/properties-of-sunlight/elevation-angle
-		// *(180/Math.PI) https://stackoverflow.com/questions/27351123/math-acos-not-working
-		riseTimeGMT = 12 - radToDeg(Math.acos(Acos))/15  - tc/60; 
-		setTimeGMT = 12 + radToDeg(Math.acos(Acos))/15  - tc/60;
-		console.log("riseTimeLST HOUR " + DecimalToHour(riseTimeGMT) );
-		console.log("setTimeLST HOUR " + DecimalToHour(setTimeGMT) );
 	 
-		return "<tr><td>"+ formatDate(calculateDate)+"</td><td>"+dayOfYear(calculateDate)+"</td><td>"+DecimalToHour(riseTimeGMT)+"</td><td>"+ tuluTime(riseTimeGMT,setTimeGMT)+"</td><td>" + asrTime(riseTimeGMT,setTimeGMT)+ "</td><td>" + DecimalToHour(setTimeGMT) + "</td><td>" + declination + "</td><td>" + EoT.toFixed(2) + " min </td><td>" + (tc/60).toFixed(2)  + " min </td><td>"+radToDeg(Math.acos(Acos))+"</td></tr>";
+		var tulutime = tuluTime(longitude,EoT, timezone);
+		
+		var sunset = sunSet(tulutime,declination);
+		var sunrise = sunRise(tulutime,declination);
+	 
+		return "<tr><td>"+ formatDate(calculateDate)+"</td><td>"+dayOfYear(calculateDate)+"</td><td>"+DecimalToHour(sunrise)+"</td><td>"+ DecimalToHour(tulutime)+"</td><td>" + asrTime(tulutime,sunset)+ "</td><td>" + DecimalToHour(sunset) + "</td><td>" + declination + "</td><td>" + EoT.toFixed(2) + " min </td><td>" +  DecimalToHour(sunset - sunrise)  + "  </td></tr>";
 		
 	}
 	function formatDate(calculateDate){	
@@ -125,32 +100,51 @@
 		} 
 		return dd + '/' + mm + '/' + yyyy;
 	}
-	function tuluTime(riseTimeGMT,setTimeGMT)
+	
+	
+	function sunSet(tulutime, declination)
 	{
-		return DecimalToHour((riseTimeGMT+setTimeGMT)/2);
+		var sunset = 4*(90 + declination)
+		return  tulutime + sunset;
 	}
 	
-	function asrTime(riseTimeGMT,setTimeGMT)
+	function sunRise(tulutime, declination)
 	{
-		var tuluTime = (riseTimeGMT+setTimeGMT)/2;
-		return DecimalToHour((tuluTime+setTimeGMT)/2);
+		var sunrise = 4*(90 + declination)
+		return  tulutime - sunrise;
+	}
+	
+
+	function tuluTime(longitude, EoT, timezone)
+	{	
+	
+		//https://www.esrl.noaa.gov/gmd/grad/solcalc/solareqns.PDF
+		if(longitude && EoT){ 
+			return 720 - 4 * longitude - EoT  + timezone * 60;
+		}
+		return 720;
+	}
+	
+	function asrTime(tulutime,sunset)
+	{ 
+		return DecimalToHour((tulutime+sunset)/2);
 	}
 	
 	function DecimalToHour(value)
 	{
+		value = value / 60;
 		var hour = Math.trunc(value);
 		if(hour.toString().length == 1)
 			hour = "0"+hour;
 		var remain = (value - hour) * 60;
 		var mninute = Math.trunc(remain);
 		if(mninute.toString().length == 1)
-			mninute = "0"+mninute;
-		var seconds = (remain - mninute) * 60;
+			mninute = "0"+mninute; 
+		var seconds = ((remain - mninute) * 60).toFixed(0);
 		if(seconds.toString().length == 1)
 			seconds = "0"+seconds;
-		return hour + ":" + mninute;
+		return hour + ":" + mninute+ ":" + seconds;
 	}
-	
 	function radToDeg(angleRad)
 	{
 		return (180 * angleRad / Math.PI);

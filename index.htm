@@ -82,7 +82,7 @@
 			document.getElementById("time").innerHTML = response.time;
 			document.getElementById("timezoneId").innerHTML = response.timezoneId;
 			document.getElementById("timezone").innerHTML =  response.dstOffset;
-			document.getElementById("fullyear").innerHTML = "<a href='fullyear.htm?latitude="+e.latlng.lat+"&longitude="+e.latlng.lng+"&dstOffset="+response.dstOffset+"&timezone="+response.gmtOffset+"&timezoneId="+response.timezoneId+"&lat="+response.lat+"&lng="+response.lng+"' target='_blank'>Open</a>";
+			document.getElementById("fullyear").innerHTML = "<a href='fullyear.htm?latitude="+e.latlng.lat+"&longitude="+e.latlng.lng+"&dstOffset="+response.dstOffset+"&timezone="+response.gmtOffset+"&timezoneId="+response.timezoneId+"' target='_blank'>Open</a>";
 			
 			calculateTime(e.latlng.lat, e.latlng.lng,response.dstOffset)
 		}
@@ -128,53 +128,44 @@
 		//calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
 		var B = degToRad(360/365 * ( dayOfYear() - 81)); 
 		var EoT = 9.87 * Math.sin(2*B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
-		console.log("EoT " + EoT);
-        var lstm = 15 * timezone;
-        var tc = 4*(longitude - lstm) + EoT;
-
-		console.log("tc " + tc);
-		//tc =0;
-	
-		var Acos = (-1 * Math.tan(degToRad(latitude)) * Math.tan(degToRad(declination)));
-		console.log("Acos " + Acos);
-		/*for math.acos* -1<x<1 */
-		 Acos = Acos - Math.trunc(Acos);
-		console.log("Acos " + Acos);
-		console.log("Math.Tan(latitude) " + Math.tan(degToRad(latitude)));
-		console.log("Math.Tan(declination) " +  Math.tan(degToRad(declination)));
-		console.log("Acos " + Acos);
-		console.log("Math.Acos Rad : " + Math.acos(Acos));
-		console.log("Math.Acos Degree : " +  radToDeg(Math.acos(Acos)));
-		
-		//sunrise https://pveducation.org/pvcdrom/properties-of-sunlight/elevation-angle
-		// *(180/Math.PI) https://stackoverflow.com/questions/27351123/math-acos-not-working
-		riseTimeGMT = 12 - radToDeg(Math.acos(Acos))/15  - tc/60; 
-		setTimeGMT = 12 + radToDeg(Math.acos(Acos))/15  - tc/60;
-		
-		console.log("riseTimeGMT : " + riseTimeGMT);
-		console.log("setTimeGMT : " + setTimeGMT);
-		document.getElementById("fajrEndTime").innerHTML = DecimalToHour(riseTimeGMT);
-		document.getElementById("tuluTime").innerHTML = tuluTime(riseTimeGMT,setTimeGMT);
-		document.getElementById("asrTime").innerHTML = asrTime(riseTimeGMT,setTimeGMT);
-		document.getElementById("maghribTime").innerHTML = DecimalToHour(setTimeGMT);
-		console.log("riseTimeLST HOUR " + DecimalToHour(riseTimeGMT) );
-		console.log("setTimeLST HOUR " + DecimalToHour(setTimeGMT) );
+		 
+		 var tulutime = tuluTime(longitude,EoT,timezone);
+		var sunset = sunSet(tulutime,declination);
+		var sunrise = sunRise(tulutime,declination); 
+		document.getElementById("fajrEndTime").innerHTML = DecimalToHour(sunrise);
+		document.getElementById("tuluTime").innerHTML = DecimalToHour(tulutime);
+		document.getElementById("asrTime").innerHTML = asrTime(tulutime,sunset);
+		document.getElementById("maghribTime").innerHTML = DecimalToHour(sunset);  
+	}
 	 
+	function sunSet(tulutime, declination)
+	{
+		var sunset = 4*(90 + declination)
+		return  tulutime + sunset;
 	}
 	
-	function tuluTime(riseTimeGMT,setTimeGMT)
+	function sunRise(tulutime, declination)
 	{
-		return DecimalToHour((riseTimeGMT+setTimeGMT)/2);
+		var sunrise = 4*(90 + declination)
+		return  tulutime - sunrise;
 	}
 	
-	function asrTime(riseTimeGMT,setTimeGMT)
-	{
-		var tuluTime = (riseTimeGMT+setTimeGMT)/2;
-		return DecimalToHour((tuluTime+setTimeGMT)/2);
+	function tuluTime(longitude, EoT, timezone)
+	{	
+		if(longitude && EoT){ 
+			return 720 - 4 * longitude - EoT  + timezone * 60;
+		}
+		return 720;
+	}
+	
+	function asrTime(tulutime,sunset)
+	{ 
+		return DecimalToHour((tulutime+sunset)/2);
 	}
 	
 	function DecimalToHour(value)
 	{
+		value = value / 60;
 		var hour = Math.trunc(value);
 		if(hour.toString().length == 1)
 			hour = "0"+hour;
@@ -182,12 +173,11 @@
 		var mninute = Math.trunc(remain);
 		if(mninute.toString().length == 1)
 			mninute = "0"+mninute;
-		var seconds = (remain - mninute) * 60;
+		var seconds = ((remain - mninute) * 60).toFixed(0);
 		if(seconds.toString().length == 1)
 			seconds = "0"+seconds;
-		return hour + ":" + mninute;
+		return hour + ":" + mninute+ ":" + seconds;
 	}
-	
 	function radToDeg(angleRad)
 	{
 		return (180 * angleRad / Math.PI);
