@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -13,14 +13,23 @@
 	#list b{ float:left; width: 20%; height:20px; }
 	#timetable td { width: 80px; border:1px solid #ccc;}
     </style>
-
+	<script src="calc.js" ></script>
+ 
 	<title>Pray Time - Full Year</title>
   </head>
   <body>
 
-	<h4>Pray time - Full Year</h4>
+	<h2>Pray time - Full Year</h2>
+
+
+<h3 style='color:red;'>Pray time for flight specific arrangemnet.</h3>
+<p style='color:red;'>
+<b>Calculations are made by subtracting degrees more than 45 degrees from locations above 45 degrees.</b>
+</p>
+
+
 <div id="list">
-<b>Timezone</b>
+<b>Information</b>
 <span id="timezone"></span>
 <hr/>
 <b>Region</b>
@@ -40,9 +49,20 @@
 	var timezone = urlParams.get('timezone');
 	var timezoneId = urlParams.get('timezoneId'); 
 
-	var text = "<table id='timetable'><tr><td>Date</td><td>DayOfYear</td><td>Fajr End Time</td><td>Tulu Time</td><td>Asr Time</td><td>Maghrib Time</td><td>Declination</td><td>EoT</td><td>Day Length</td></tr>";
+	var text = "<table id='timetable'><tr><td>Date</td>"+
+	"<td>DayOfYear</td>"+
+	"<td>Dawn Time</td>"+
+	"<td>Fajr Begin Time</td>"+
+	"<td>Fajr End Time</td>"+
+	"<td>Tulu Time</td>"+
+	"<td>Asr Time</td>"+
+	"<td>Maghrib Time</td>"+
+	"<td>Isha Time</td>"+
+	"<td>Isha End Time</td>"+
+	"<td>Declination</td>"+
+	"<td>Day Length</td></tr>";
 	if(timezone !== dstOffset){
-		text = "<h3>Please consider for day light saving (DST)!</h3>" + text;
+		text = "<h3 style='color:red;'>Please consider for day light saving (DST)!</h3>" + text;
 	} 
 	
 	var now = new Date();
@@ -51,109 +71,57 @@
 	}
 	text += "</table>";
 	document.getElementById("timelist").innerHTML = text;
-	document.getElementById("timezone").innerHTML = "timezone :" +  timezone + " latitude - longitude : " + latitude +" - " + longitude;
+	document.getElementById("timezone").innerHTML = "timezone :" + timezone + " latitude - longitude : " + parseFloat(latitude).toFixed(3) + " - " + parseFloat(longitude).toFixed(3);
 	document.getElementById("timezoneId").innerHTML = timezoneId;
 	
-	function dayOfYear(calculateDate){
-		var start = new Date(now.getFullYear(), 0, 0);
-		var diff = calculateDate - start;
-		var oneDay = 1000 * 60 * 60 * 24;
-		var day = Math.floor(diff / oneDay);
-		console.log('Day of year: ' + day);
-		return day;
-	}
 	
 	function calculateTime(latitude, longitude, timezone, calculateDate){
 	
 		/* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
-		var sina=  360/365 * (dayOfYear(calculateDate) - 81) ; 
-		console.log("sina " + sina);
+		var sina=  360/365 * (PrayTime.dayOfYear(calculateDate) - 81) ; 
+		//console.log("sina " + sina);
 		/*declination calculation*/
-		declination = 23.45 *  Math.sin(degToRad(sina));
-		console.log("declination " + declination); 
+		declination = 23.45 *  Math.sin(PrayTime.degToRad(sina));
+		//console.log("declination " + declination); 
+		
+		if(latitude >  45){
+			latitude = 90 - latitude;
+			console.log("latitude " + latitude);
+		}
 		
 		//calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
-		var B = degToRad(360/365 * ( dayOfYear(calculateDate) - 81)); 
+		var B = PrayTime.degToRad(360/365 * ( PrayTime.dayOfYear(calculateDate) - 81)); 
 		var EoT = 9.87 * Math.sin(2*B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
 		console.log("EoT " + EoT);
-        var lstm = 15 * timezone;
+        
+		var lstm = 15 * timezone;
         var tc = 4*(longitude - lstm) + EoT;
 	 
-		var tulutime = tuluTime(longitude,EoT, timezone);
+		var tulutime = PrayTime.tuluTime(longitude,EoT, timezone);
 		
-		var sunset = sunSet(tulutime,declination);
-		var sunrise = sunRise(tulutime,declination);
-	 
-		return "<tr><td>"+ formatDate(calculateDate)+"</td><td>"+dayOfYear(calculateDate)+"</td><td>"+DecimalToHour(sunrise)+"</td><td>"+ DecimalToHour(tulutime)+"</td><td>" + asrTime(tulutime,sunset)+ "</td><td>" + DecimalToHour(sunset) + "</td><td>" + declination + "</td><td>" + EoT.toFixed(2) + " min </td><td>" +  DecimalToHour(sunset - sunrise)  + "  </td></tr>";
+		var sunset = PrayTime.sunSet(tulutime,declination);
+		var sunrise = PrayTime.sunRise(tulutime,declination);
+	 	var elevationAngle = PrayTime.elevationAngle(latitude,declination,true); 
+		var elevationAngleNight = PrayTime.elevationAngle(latitude,declination,false); 
+
+		return "<tr><td>"+ PrayTime.formatDate(calculateDate)+
+			"</td><td>" + PrayTime.dayOfYear(calculateDate)+
+			"</td><td>" + PrayTime.dawnTime(tulutime,declination,latitude, elevationAngleNight)+
+			"</td><td>" + PrayTime.fajrBeginTime(tulutime,declination,latitude, elevationAngleNight)+
+			"</td><td>" + PrayTime.fajrEndTime(sunrise)+
+			"</td><td>" + PrayTime.decimalToHour(tulutime)+
+			"</td><td>" + PrayTime.asrTime(tulutime,declination,latitude, elevationAngle)+ 
+			"</td><td>" + PrayTime.maghribTime(sunset)+ 
+			"</td><td>" + PrayTime.ishaTime(tulutime,declination,latitude, elevationAngleNight)+ 
+			"</td><td>" + PrayTime.ishaEndTime(tulutime,declination,latitude, elevationAngleNight)+ 
+			"</td><td>" + declination.toFixed(2) + 
+			"</td><td>" + PrayTime.decimalToHour(sunset - sunrise)  + 
+			"</td></tr>";
 		
 	}
-	function formatDate(calculateDate){	
-		var dd = calculateDate.getDate();
-		var mm = calculateDate.getMonth() + 1; //January is 0!
-
-		var yyyy = calculateDate.getFullYear();
-		if (dd < 10) {
-		  dd = '0' + dd;
-		} 
-		if (mm < 10) {
-		  mm = '0' + mm;
-		} 
-		return dd + '/' + mm + '/' + yyyy;
-	}
 	
 	
-	function sunSet(tulutime, declination)
-	{
-		var sunset = 4*(90 + declination)
-		return  tulutime + sunset;
-	}
 	
-	function sunRise(tulutime, declination)
-	{
-		var sunrise = 4*(90 + declination)
-		return  tulutime - sunrise;
-	}
-	
-
-	function tuluTime(longitude, EoT, timezone)
-	{	
-	
-		//https://www.esrl.noaa.gov/gmd/grad/solcalc/solareqns.PDF
-		if(longitude && EoT){ 
-			return 720 - 4 * longitude - EoT  + timezone * 60;
-		}
-		return 720;
-	}
-	
-	function asrTime(tulutime,sunset)
-	{ 
-		return DecimalToHour((tulutime+sunset)/2);
-	}
-	
-	function DecimalToHour(value)
-	{
-		value = value / 60;
-		var hour = Math.trunc(value);
-		if(hour.toString().length == 1)
-			hour = "0"+hour;
-		var remain = (value - hour) * 60;
-		var mninute = Math.trunc(remain);
-		if(mninute.toString().length == 1)
-			mninute = "0"+mninute; 
-		var seconds = ((remain - mninute) * 60).toFixed(0);
-		if(seconds.toString().length == 1)
-			seconds = "0"+seconds;
-		return hour + ":" + mninute+ ":" + seconds;
-	}
-	function radToDeg(angleRad)
-	{
-		return (180 * angleRad / Math.PI);
-	}
-
-	function degToRad(angleDeg)
-	{
-		return (Math.PI * angleDeg / 180);
-	}
 </script>
 
   </body>
