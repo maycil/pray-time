@@ -1,128 +1,135 @@
 ﻿<!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <meta name="keywords" content="Pray Time Application V 0.1.0" />
-    <meta name="description" content="Experimental Pray Time Application V 0.1.0" />
+    <meta name="keywords" content="Pray Time Application V 0.2.0" />
+    <meta name="description" content="Experimental Pray Time Application V 0.2.0" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-	<style> 
-	#list { width: 1000px; }
-	#list span{ float:left;width: 80%; height:20px; }
-	#list b{ float:left; width: 20%; height:20px; }
-	#timetable td { width: 80px; border:1px solid #ccc;}
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+        /* Set black background color, white text and some padding */
+        footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+            .row.content {
+                height: auto;
+            }
+        }
     </style>
-	<script src="calc.js" ></script>
- 
-	<title>Pray Time - Full Year</title>
-  </head>
-  <body>
+    <script src="calc.js"></script>
 
-	<h2>Pray time - Full Year</h2>
+    <title>Pray Time - Full Year</title>
+</head>
+<body>
 
+    <div class="container-fluid text-center">
+        <div class="row content">
+            <div class="col-sm-12 text-left">
 
-<h3 style='color:red;'>Pray time for flight specific arrangemnet.</h3>
-<p style='color:red;'>
-<b>Calculations are made by subtracting degrees more than 45 degrees from locations above 45 degrees.</b>
-</p>
+                <h2>Pray time - Full Year</h2>
 
 
-<div id="list">
-<b>Information</b>
-<span id="timezone"></span>
-<hr/>
-<b>Region</b>
-<span id="timezoneId"></span>
-<hr/>
-</div>
-<div id="timelist">
-</div>
+                <h3 style='color:red;'>Pray time for flight specific arrangemnet.</h3>
+                <p style='color:red;'>
+                    <b>Calculations are made by subtracting degrees more than 45 degrees from locations above 45 degrees.</b>
+                </p>
 
-	
-<script>
 
-	var urlParams = new URLSearchParams(window.location.search);
-	var latitude = urlParams.get('latitude');
-	var longitude = urlParams.get('longitude');
-	var dstOffset = urlParams.get('dstOffset');
-	var timezone = urlParams.get('timezone');
-	var timezoneId = urlParams.get('timezoneId'); 
+                <b>Information</b>
+                <span id="timezoneId"></span> &nbsp;&nbsp; <span id="timezone"></span>
 
-	var text = "<table id='timetable'><tr><td>Date</td>"+
-	"<td>DayOfYear</td>"+
-	"<td>Dawn Time</td>"+
-	"<td>Fajr Begin Time</td>"+
-	"<td>Fajr End Time</td>"+
-	"<td>Tulu Time</td>"+
-	"<td>Asr Time</td>"+
-	"<td>Maghrib Time</td>"+
-	"<td>Isha Time</td>"+
-	"<td>Isha End Time</td>"+
-	"<td>Declination</td>"+
-	"<td>Day Length</td></tr>";
-	if(timezone !== dstOffset){
-		text = "<h3 style='color:red;'>Please consider for day light saving (DST)!</h3>" + text;
-	} 
-	
-	var now = new Date();
-	for(var i=1; i< 366; i++){
-		text += calculateTime(latitude, longitude, dstOffset, new Date(now.getFullYear(),0,i));
-	}
-	text += "</table>";
-	document.getElementById("timelist").innerHTML = text;
-	document.getElementById("timezone").innerHTML = "timezone :" + timezone + " latitude - longitude : " + parseFloat(latitude).toFixed(3) + " - " + parseFloat(longitude).toFixed(3);
-	document.getElementById("timezoneId").innerHTML = timezoneId;
-	
-	
-	function calculateTime(latitude, longitude, timezone, calculateDate){
-	
-		/* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
-		var sina=  360/365 * (PrayTime.dayOfYear(calculateDate) - 81) ; 
-		//console.log("sina " + sina);
-		/*declination calculation*/
-		declination = 23.45 *  Math.sin(PrayTime.degToRad(sina));
-		//console.log("declination " + declination); 
-		
-		if(latitude >  45){
-			latitude = 90 - latitude;
-			console.log("latitude " + latitude);
-		}
-		
-		//calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
-		var B = PrayTime.degToRad(360/365 * ( PrayTime.dayOfYear(calculateDate) - 81)); 
-		var EoT = 9.87 * Math.sin(2*B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
-		console.log("EoT " + EoT);
-        
-		var lstm = 15 * timezone;
-        var tc = 4*(longitude - lstm) + EoT;
-	 
-		var tulutime = PrayTime.tuluTime(longitude,EoT, timezone);
-		
-		var sunset = PrayTime.sunSet(tulutime,declination);
-		var sunrise = PrayTime.sunRise(tulutime,declination);
-	 	var elevationAngle = PrayTime.elevationAngle(latitude,declination,true); 
-		var elevationAngleNight = PrayTime.elevationAngle(latitude,declination,false); 
+                <div id="timelist">
+                </div>
 
-		return "<tr><td>"+ PrayTime.formatDate(calculateDate)+
-			"</td><td>" + PrayTime.dayOfYear(calculateDate)+
-			"</td><td>" + PrayTime.dawnTime(tulutime,declination,latitude, elevationAngleNight)+
-			"</td><td>" + PrayTime.fajrBeginTime(tulutime,declination,latitude, elevationAngleNight)+
-			"</td><td>" + PrayTime.fajrEndTime(sunrise)+
-			"</td><td>" + PrayTime.decimalToHour(tulutime)+
-			"</td><td>" + PrayTime.asrTime(tulutime,declination,latitude, elevationAngle)+ 
-			"</td><td>" + PrayTime.maghribTime(sunset)+ 
-			"</td><td>" + PrayTime.ishaTime(tulutime,declination,latitude, elevationAngleNight)+ 
-			"</td><td>" + PrayTime.ishaEndTime(tulutime,declination,latitude, elevationAngleNight)+ 
-			"</td><td>" + declination.toFixed(2) + 
-			"</td><td>" + PrayTime.decimalToHour(sunset - sunrise)  + 
-			"</td></tr>";
-		
-	}
-	
-	
-	
-</script>
+            </div>
+        </div>
+    </div>
 
-  </body>
+    <script>
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var latitude = urlParams.get('latitude');
+        var longitude = urlParams.get('longitude');
+        var dstOffset = urlParams.get('dstOffset');
+        var timezone = urlParams.get('timezone');
+        var timezoneId = urlParams.get('timezoneId');
+
+        var text = "<table class='table table-striped'>" +
+        "<thead class='thead-light'><tr><th>Date</th>" +
+        "<th>Day Of Year</th>" +
+        "<th>Dawn Time</th>" +
+        "<th>Fajr Begin Time</th>" +
+        "<th>Fajr End Time</th>" +
+        "<th>Tulu Time</th>" +
+        "<th>Asr Time</th>" +
+        "<th>Maghrib Time</th>" +
+        "<th>Isha Time</th>" +
+        "<th>Isha End Time</th>" +
+        "<th>Declination</th>" +
+        "<th>Day Length</th></tr></thead>";
+        var dst = false;
+        if (timezone !== dstOffset) {
+            text = "<h3 style='color:red;'>Please consider for day light saving (DST)!</h3>" + text;
+            dst = true;
+        }
+
+        var now = new Date();
+        for (var i = 1; i < 366; i++) {
+            text += calculateTime(latitude, longitude, dstOffset, new Date(now.getFullYear(), 0, i));
+        }
+        text += "</table>";
+        document.getElementById("timelist").innerHTML = text;
+        document.getElementById("timezone").innerHTML = " timezone : " + timezone + " latitude : " + parseFloat(latitude).toFixed(3) + " longitude : " + parseFloat(longitude).toFixed(3);
+        document.getElementById("timezoneId").innerHTML = timezoneId;
+
+
+        function calculateTime(latitude, longitude, timezone, calculateDate, dst) {
+
+            /* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
+            var sina = 360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81);
+            //console.log("sina " + sina);
+            /*declination calculation*/
+            declination = 23.45 * Math.sin(PrayTime.degToRad(sina));
+            //console.log("declination " + declination);
+
+            //calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
+            var B = PrayTime.degToRad(360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81));
+            var EoT = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+            console.log("EoT ", EoT, calculateDate);
+
+            var elevationAngle = PrayTime.elevationAngle(latitude, declination, true);
+            var elevationAngleNight = PrayTime.elevationAngle(latitude, declination, false);
+            var tulutime = PrayTime.tuluTime(longitude, EoT, timezone);
+            var sunset = PrayTime.sunSet(tulutime, declination, latitude, elevationAngle, EoT);
+            var sunrise = PrayTime.sunRise(tulutime, declination, latitude, elevationAngle, EoT);
+
+
+            return "<tr><td>" + PrayTime.formatDate(calculateDate) +
+                "</td><td>" + PrayTime.dayOfYear(calculateDate) +
+                "</td><td>" + PrayTime.dawnTime(tulutime, declination, latitude, elevationAngleNight) +
+                "</td><td>" + PrayTime.fajrBeginTime(tulutime, declination, latitude, elevationAngleNight) +
+                "</td><td>" + PrayTime.fajrEndTime(sunrise) +
+                "</td><td>" + PrayTime.decimalToHour(tulutime) +
+                "</td><td>" + PrayTime.asrTime(tulutime, declination, latitude, elevationAngle) +
+                "</td><td>" + PrayTime.maghribTime(sunset) +
+                "</td><td>" + PrayTime.ishaTime(tulutime, declination, latitude, elevationAngleNight) +
+                "</td><td>" + PrayTime.ishaEndTime(tulutime, declination, latitude, elevationAngleNight) +
+                "</td><td>" + declination.toFixed(3) +
+                "</td><td>" + PrayTime.decimalToHour(sunset - sunrise) +
+                "</td></tr>";
+
+        }
+
+
+
+    </script>
+
+</body>
 </html>

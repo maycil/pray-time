@@ -10,17 +10,34 @@ var PrayTime =
 
     },
 
-    sunRise: function (tulutime, declination) {
-        var sunrise = 4 * (90 + declination)
-        return tulutime - sunrise;
+    sunRise: function (tuluTime, declination, latitude, elevationAngle, EoT) {
+        var a = 0;
+        var d = PrayTime.degToRad(declination);
+        var l = PrayTime.degToRad(latitude);
+        var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
+
+        var hra = PrayTime.radToDeg(Math.acos(cosHRA)) + 1;
+        return tuluTime - hra * 4;
+
     },
 
-    sunSet: function (tulutime, declination) {
-        var sunset = 4 * (90 + declination)
-        return tulutime + sunset;
+    sunSet: function (tuluTime, declination, latitude, elevationAngle, EoT) {
+        var a = 0;
+        var d = PrayTime.degToRad(declination);
+        var l = PrayTime.degToRad(latitude);
+        var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
+
+        var hra = PrayTime.radToDeg(Math.acos(cosHRA)) + 1;
+        return tuluTime + hra * 4;
     },
 
     /*
+	trg
+	https://www.analyzemath.com/trigonometry/trigonometric_formulas.html
+	cos(X - Y) = cosX cosY + sinX sinY
+	cosX cosY = (1/2) [ cos (X - Y) + cos (X + Y) ]
+	sinX sinY = (1/2) [ cos (X - Y) - cos (X + Y) ]
+	
     ω = the hour angle;
     α = the altitude angle;
     δ = the declination angle;
@@ -37,21 +54,28 @@ var PrayTime =
         var l = PrayTime.degToRad(latitude);
         var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
 
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA));
+        //calc with sunrise elevationAngle
+        //sinα = sinδ * sin φ + cosδ * cos ω * cos φ 
+        if (cosHRA > 1 || cosHRA < -1) {
+            var sunriseHRA = PrayTime.sunRise(tuluTime, declination);
+            return PrayTime.decimalToHour(sunriseHRA - 4 * 18);
+        }
 
+
+        var hra = PrayTime.radToDeg(Math.acos(cosHRA));
         return PrayTime.decimalToHour(tuluTime - hra * 4);
     },
 
 
     fajrBeginTime: function (tuluTime, declination, latitude, elevationAngle) {
-
+        //calc with sunrise elevationAngle
+        //sinα = sinδ * sin φ + cosδ * cos ω * cos φ 
         var a = PrayTime.degToRad(-9);
         var d = PrayTime.degToRad(declination);
         var l = PrayTime.degToRad(latitude);
         var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
 
         var hra = PrayTime.radToDeg(Math.acos(cosHRA));
-
         return PrayTime.decimalToHour(tuluTime - hra * 4);
 
     },
@@ -160,5 +184,37 @@ var PrayTime =
             mm = '0' + mm;
         }
         return dd + '/' + mm + '/' + yyyy;
+    }
+};
+
+var UserLocation =
+{
+    //default value is istanbul
+    latitude: 41.005,
+    longitude: 28.9,
+
+    getLocation: function (callback) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                UserLocation.latitude = position.coords.latitude;
+                UserLocation.longitude = position.coords.longitude;
+                console.log("lat long", UserLocation.latitude, UserLocation.longitude);
+                if (callback) {
+                    callback();
+                }
+            },
+            function (error) {
+                console.log("no permission");
+                if (callback) {
+                    callback();
+                }
+            });
+        }
+        else {
+            console.log("Geolocation is not supported by this browser.");
+            if (callback) {
+                callback();
+            }
+        }
     }
 }
