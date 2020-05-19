@@ -80,7 +80,7 @@ Isha time calculate by set the elevation angle is -9 degree.   And then tulu tim
 
 Isha end  time calculate by set the elevation angle is -18 degree. It is also known as astronomical twilight.  And then tulu time is summed with calculated time.
 
-	α = -9;
+	α = -18;
     cos ω = (sinα - sinδ * sin φ) / (cosδ * cos φ)  
 	ishaTime =  tuluTime +  acos(ω) * 4
 	 
