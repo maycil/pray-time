@@ -12,7 +12,7 @@
     <style>
         #list {
             width: 210px;
-            height: 250px;
+            height: 265px;
         }
 
             #list span {
@@ -58,6 +58,11 @@
 				<p>
 				Click for detail <a href='https://github.com/maycil/pray-time/blob/master/README.md' target='_blank'>Pray Time Calculation</a>
 				</p>
+				<h3 style='color:red;'>Pray time for flight specific arrangement.</h3>
+                <p style='color:red;'>
+                    <b>Calculations are made by subtracting degrees more than 45 degrees from locations above 45 degrees.</b>
+                </p>
+
                 <div id="list" style="display:none">
                     <span>Time</span>
                     <span id="time"></span>
@@ -85,6 +90,8 @@
                     <span id="ishaEndTime"></span>
                     <span>Full Year Time</span>
                     <span id="fullyear"></span>
+                    <span style="color:red;display:none" id="calcLatText">Calc latitude</span>
+                    <span style="color:red;display:none" id="calcLatValue"></span>
                 </div>
             </div>
         </div>
@@ -134,8 +141,18 @@
             _map.fire("click");
         });
 
-        function calculateTime(latitude, longitude, timezone) { 
-			var declination = PrayTime.declination(new Date());
+        function calculateTime(latitude, longitude, timezone) {
+            document.getElementById("calcLatText").style.display = "none";
+            document.getElementById("calcLatValue").style.display = "none";
+			if (latitude > 45) {
+                latitude = 90 - latitude;
+                console.log("calc latitude " + latitude);
+				document.getElementById("calcLatText").style.display = "";
+				document.getElementById("calcLatValue").style.display = "";
+				document.getElementById("calcLatValue").innerHTML = latitude.toFixed(3);
+			}
+
+			var declination =  PrayTime.declination(new Date());
 			var EoT = PrayTime.equationofTime(new Date());
             //console.log("EoT ", EoT, new Date());
             var elevationAngle = PrayTime.elevationAngle(latitude, declination, true);
@@ -158,3 +175,4 @@
 
 </body>
 </html>
+

@@ -167,8 +167,6 @@ var PrayTime =
 	},
 
     decimalToHour: function (value) {
-		if(isNaN(value))
-			return "-";
         value = value / 60;
         var hour = Math.trunc(value);
         if (hour.toString().length == 1)
