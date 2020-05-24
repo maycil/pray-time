@@ -1,10 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <meta name="keywords" content="Pray Time Application V 0.2.0" />
-    <meta name="description" content="Experimental Pray Time Application V 0.2.0" />
+    <meta name="keywords" content="Pray Time Application V 0.2.1" />
+    <meta name="description" content="Experimental Pray Time Application V 0.2.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="Content-Security-Policy" content="script-src *  'unsafe-inline' http://api.geonames.org;">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="*" />
@@ -12,6 +12,7 @@
     <style>
         #list {
             width: 210px;
+            height: 250px;
         }
 
             #list span {
@@ -48,55 +49,42 @@
 
                 <h4>Calculation is based on below formulas.</h4>
                 <ul>
-                    <li>sunrise-sunset: <a href="https://pveducation.org/pvcdrom/properties-of-sunlight/elevation-angle" target="_blank">https://pveducation.org/pvcdrom/properties-of-sunlight/elevation-angle</a> </li>
-                    <li>declination:  <a href="https://www.pveducation.org/pvcdrom/properties-of-sunlight/declination-angle" target="_blank">https://www.pveducation.org/pvcdrom/properties-of-sunlight/declination-angle</a></li>
-                    <li>solar time :  <a href="https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time" target="_blank">https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time</a> </li>
+                    <li>Elevation Angle: <a href="https://pveducation.org/pvcdrom/properties-of-sunlight/elevation-angle" target="_blank">https://pveducation.org/pvcdrom/properties-of-sunlight/elevation-angle</a> </li>
+                    <li>Solar noon :  <a href="https://www.esrl.noaa.gov/gmd/grad/solcalc/solareqns.PDF" target="_blank">https://www.esrl.noaa.gov/gmd/grad/solcalc/solareqns.PDF</a> </li>
+					<li>Equation Of Time: :  <a href="https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time" target="_blank">https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time</a> </li>		
+                    <li>Declination:  <a href="https://www.pveducation.org/pvcdrom/properties-of-sunlight/declination-angle" target="_blank">https://www.pveducation.org/pvcdrom/properties-of-sunlight/declination-angle</a></li>
+					
                 </ul>
-
-
-                <h3 style='color:red;'>Pray time for flight specific arrangemnet.</h3>
-                <p style='color:red;'>
-                    <b>Calculations are made by subtracting degrees more than 45 degrees from locations above 45 degrees.</b>
-                </p>
-
-
+				<p>
+				Click for detail <a href='https://github.com/maycil/pray-time/blob/master/README.md' target='_blank'>Pray Time Calculation</a>
+				</p>
                 <div id="list" style="display:none">
                     <span>Time</span>
                     <span id="time"></span>
-                    <hr />
                     <span>Timezone</span>
                     <span id="timezone"></span>
-                    <hr />
                     <span>Region</span>
                     <span id="timezoneId"></span>
-                    <hr />
+                    <span>Lat/Lng</span>
+                    <span id="latlng"></span>
                     <span>Dawn Time</span>
                     <span id="dawnTime"></span>
-                    <hr />
                     <span>Fajr Begin Time</span>
                     <span id="fajrBeginTime"></span>
-                    <hr />
                     <span>Fajr End Time</span>
                     <span id="fajrEndTime"></span>
-                    <hr />
                     <span>Tulu Time</span>
                     <span id="tuluTime"></span>
-                    <hr />
                     <span>Asr Time</span>
                     <span id="asrTime"></span>
-                    <hr />
                     <span>Maghrib Time</span>
                     <span id="maghribTime"></span>
-                    <hr />
                     <span>Isha Time</span>
                     <span id="ishaTime"></span>
-                    <hr />
                     <span>Isha End Time</span>
                     <span id="ishaEndTime"></span>
-                    <hr />
                     <span>Full Year Time</span>
                     <span id="fullyear"></span>
-                    <hr />
                 </div>
             </div>
         </div>
@@ -126,6 +114,7 @@
                         // Typical action to be performed when the document is ready:
                         var response = JSON.parse(xhttp.responseText)
                         document.getElementById("time").innerHTML = response.time;
+                        document.getElementById("latlng").innerHTML = e.latlng.lat.toFixed(3) + " / " +e.latlng.lng.toFixed(3)
                         document.getElementById("timezoneId").innerHTML = response.timezoneId;
                         document.getElementById("timezone").innerHTML = response.dstOffset;
                         document.getElementById("fullyear").innerHTML = "<a href='fullyear.htm?latitude=" + e.latlng.lat + "&longitude=" + e.latlng.lng + "&dstOffset=" + response.dstOffset + "&timezone=" + response.gmtOffset + "&timezoneId=" + response.timezoneId + "' target='_blank'>Open</a>";
@@ -145,28 +134,10 @@
             _map.fire("click");
         });
 
-        function calculateTime(latitude, longitude, timezone) {
-
-            /* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
-            var sina = 360 / 365 * (PrayTime.dayOfYear(new Date()) - 81);
-            console.log("sina " + sina);
-
-
-            /*declination calculation*/
-            declination = 23.45 * Math.sin(PrayTime.degToRad(sina));
-            console.log("declination " + declination);
-
-            console.log("latitude " + latitude);
-            if (latitude > 45) {
-                latitude = 90 - latitude;
-                console.log("calc latitude " + latitude);
-            }
-
-            //https://www.itacanet.org/the-sun-as-a-source-of-energy/part-3-calculating-solar-angles/
-            //calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
-            var B = PrayTime.degToRad(360 / 365 * (PrayTime.dayOfYear(new Date()) - 81));
-            var EoT = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
-
+        function calculateTime(latitude, longitude, timezone) { 
+			var declination = PrayTime.declination(new Date());
+			var EoT = PrayTime.equationofTime(new Date());
+            //console.log("EoT ", EoT, new Date());
             var elevationAngle = PrayTime.elevationAngle(latitude, declination, true);
             var elevationAngleNight = PrayTime.elevationAngle(latitude, declination, false);
             var tulutime = PrayTime.tuluTime(longitude, EoT, timezone);

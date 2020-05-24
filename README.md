@@ -120,3 +120,5 @@ Elevation Angle :	https://www.pveducation.org/pvcdrom/properties-of-sunlight/ele
 Solar Noon 		:	https://www.esrl.noaa.gov/gmd/grad/solcalc/solareqns.PDF
 
 Equation Of Time:	https://www.pveducation.org/pvcdrom/properties-of-sunlight/solar-time
+
+Declination		:  https://www.pveducation.org/pvcdrom/properties-of-sunlight/declination-angle

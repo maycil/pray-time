@@ -146,10 +146,29 @@ var PrayTime =
             //day and night altitude differences is 2*declination
             altitude = 90 - latitude - declination;
         }
+		if(altitude > 90)
+			altitude = 180 - altitude;
         return altitude;
     },
+	
+	declination: function(calculateDate){
+		
+		/* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
+		var sina = 360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81);          
+		return 23.45 * Math.sin(PrayTime.degToRad(sina));
+	},
+	
+	equationofTime : function(calculateDate){
+		
+		//calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
+		var B = PrayTime.degToRad(360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81));
+		var eoT = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+		return eoT; 
+	},
 
     decimalToHour: function (value) {
+		if(isNaN(value))
+			return "-";
         value = value / 60;
         var hour = Math.trunc(value);
         if (hour.toString().length == 1)

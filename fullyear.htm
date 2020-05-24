@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <meta name="keywords" content="Pray Time Application V 0.2.0" />
-    <meta name="description" content="Experimental Pray Time Application V 0.2.0" />
+    <meta name="keywords" content="Pray Time Application V 0.2.1" />
+    <meta name="description" content="Experimental Pray Time Application V 0.2.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
 
@@ -32,15 +32,7 @@
     <div class="container-fluid text-center">
         <div class="row content">
             <div class="col-sm-12 text-left">
-
                 <h2>Pray time - Full Year</h2>
-
-
-                <h3 style='color:red;'>Pray time for flight specific arrangemnet.</h3>
-                <p style='color:red;'>
-                    <b>Calculations are made by subtracting degrees more than 45 degrees from locations above 45 degrees.</b>
-                </p>
-
 
                 <b>Information</b>
                 <span id="timezoneId"></span> &nbsp;&nbsp; <span id="timezone"></span>
@@ -91,19 +83,10 @@
 
 
         function calculateTime(latitude, longitude, timezone, calculateDate, dst) {
-
-            /* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
-            var sina = 360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81);
-            //console.log("sina " + sina);
-            /*declination calculation*/
-            declination = 23.45 * Math.sin(PrayTime.degToRad(sina));
-            //console.log("declination " + declination);
-
-            //calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
-            var B = PrayTime.degToRad(360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81));
-            var EoT = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
-            console.log("EoT ", EoT, calculateDate);
-
+			
+			var declination =  PrayTime.declination(calculateDate);
+			var EoT = PrayTime.equationofTime(calculateDate);
+            //console.log("EoT ", EoT, calculateDate);
             var elevationAngle = PrayTime.elevationAngle(latitude, declination, true);
             var elevationAngleNight = PrayTime.elevationAngle(latitude, declination, false);
             var tulutime = PrayTime.tuluTime(longitude, EoT, timezone);
@@ -121,7 +104,7 @@
                 "</td><td>" + PrayTime.maghribTime(sunset) +
                 "</td><td>" + PrayTime.ishaTime(tulutime, declination, latitude, elevationAngleNight) +
                 "</td><td>" + PrayTime.ishaEndTime(tulutime, declination, latitude, elevationAngleNight) +
-                "</td><td>" + declination.toFixed(3) +
+                "</td><td>" + declination.toFixed(3) + " e/n " + elevationAngle.toFixed(2) + " / " + elevationAngleNight.toFixed(2) +
                 "</td><td>" + PrayTime.decimalToHour(sunset - sunrise) +
                 "</td></tr>";
 
