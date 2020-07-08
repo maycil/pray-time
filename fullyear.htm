@@ -87,6 +87,10 @@
 			latitude = 90 - latitude;
 			document.getElementById("timezone").innerHTML += "<b style='color:red;'> calc latitude : " + latitude.toFixed(3) +"</b>"; 
 		}
+		if (latitude < -45) {
+			latitude = -90 - latitude;
+			document.getElementById("timezone").innerHTML += "<b style='color:red;'> calc latitude : " + latitude.toFixed(3) +"</b>"; 
+		}
 
         var now = new Date();
         for (var i = 1; i < 366; i++) {

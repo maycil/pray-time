@@ -151,6 +151,13 @@
 				document.getElementById("calcLatValue").style.display = "";
 				document.getElementById("calcLatValue").innerHTML = latitude.toFixed(3);
 			}
+			if (latitude < -45) {
+                latitude = -90 - latitude;
+                console.log("calc latitude " + latitude);
+				document.getElementById("calcLatText").style.display = "";
+				document.getElementById("calcLatValue").style.display = "";
+				document.getElementById("calcLatValue").innerHTML = latitude.toFixed(3);
+			}
 
 			var declination =  PrayTime.declination(new Date());
 			var EoT = PrayTime.equationofTime(new Date());
