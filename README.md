@@ -104,12 +104,17 @@ The elevation, α, can be found using the following formula at any time:
 
     sinα = sinδ * sin φ  - cosδ *  cos φ 
 
-	if sin(X - Y) = sinX cosY - cosX sinY
+	 
+	if cos(X + Y) = cosX cosY - sinX sinY
 
-    sin(φ - α)  = sin φ * sinδ   - cos φ * cosδ    
-	sinα = sin(φ - α)
+    cos(φ + δ)  = -1* (cos φ * cosδ  - sin φ * sinδ)  
+	
+	sinα =  -1 * cos(φ + δ)
+	
+	cos(90 - α) =  -1 * cos(φ + δ)
 
 	α=90+φ−δ 
+	
 
 # References:
 

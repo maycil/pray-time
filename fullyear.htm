@@ -47,12 +47,11 @@
     <script>
 
         var urlParams = new URLSearchParams(window.location.search);
-        var latitude = urlParams.get('latitude');
-        var longitude = urlParams.get('longitude');
-        var dstOffset = urlParams.get('dstOffset');
-        var timezone = urlParams.get('timezone');
-        var timezoneId = urlParams.get('timezoneId');
-
+        var latitude = parseFloat(urlParams.get('latitude')); 
+        var longitude = parseFloat(urlParams.get('longitude'));
+        var dstOffset = parseInt(urlParams.get('dstOffset'));
+        var timezone = parseInt(urlParams.get('timezone'));
+        var timezoneId = urlParams.get('timezoneId'); 
         var text = "<table class='table table-striped'>" +
         "<thead class='thead-light'><tr><th>Date</th>" +
         "<th>Day Of Year</th>" +

@@ -48,7 +48,7 @@ var PrayTime =
 
     */
 
-    dawnTime: function (tuluTime, declination, latitude, elevationAngle) {
+    dawnTime: function (tuluTime, declination, latitude, elevationAngleNight) {
   		
 		var a = PrayTime.degToRad(-18);
         var d = PrayTime.degToRad(declination);
@@ -60,7 +60,7 @@ var PrayTime =
     },
 
 
-    fajrBeginTime: function (tuluTime, declination, latitude, elevationAngle) {
+    fajrBeginTime: function (tuluTime, declination, latitude, elevationAngleNight) {
         //calc with sunrise elevationAngle
         //sinα = sinδ * sin φ + cosδ * cos ω * cos φ 
         var a = PrayTime.degToRad(-9);
@@ -102,7 +102,7 @@ var PrayTime =
     },
 
 
-    ishaTime: function (tuluTime, declination, latitude, elevationAngle) {
+    ishaTime: function (tuluTime, declination, latitude, elevationAngleNight) {
         var a = PrayTime.degToRad(-9);
         var d = PrayTime.degToRad(declination);
         var l = PrayTime.calculateLatitude(latitude,declination);
@@ -114,7 +114,7 @@ var PrayTime =
     },
 
 
-    ishaEndTime: function (tuluTime, declination, latitude, elevationAngle) {
+    ishaEndTime: function (tuluTime, declination, latitude, elevationAngleNight) {
         var a = PrayTime.degToRad(-18);
         var d = PrayTime.degToRad(declination);
         var l = PrayTime.calculateLatitude(latitude,declination);
@@ -129,18 +129,20 @@ var PrayTime =
 
         var altitude = 0;
         //https://www.pveducation.org/pvcdrom/properties-of-sunlight/elevation-angle
-        //α=90+φ−δ
-        //altitude = 90-latitude+declination 
+        //α=90+φ−δ 
         if (day) {
-            altitude = 90 - latitude + declination;
+            altitude = 90 + latitude - declination;
+			if(altitude > 90)
+				altitude = 180 - altitude;
         }
         else {
             //night			
             //day and night altitude differences is 2*declination
-            altitude = 90 - latitude - declination;
+            altitude = 90 + latitude + declination;
+			if(altitude > 90)
+				altitude = altitude - 180;
         }
-		if(altitude > 90)
-			altitude = 180 - altitude;
+		
         return altitude;
     },
 	
@@ -169,7 +171,7 @@ var PrayTime =
 		if (declination < 0 &&latitude < -45) {
 			latitude = -90 - latitude;
 		}
-		
+		 
 		return PrayTime.degToRad(latitude);
 	},
 
