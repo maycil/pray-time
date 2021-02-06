@@ -93,11 +93,13 @@ var PrayTime =
     },
 
     asrTime: function (tuluTime, declination, latitude, elevationAngle) {
-        var a = PrayTime.degToRad(elevationAngle / 2);
+        //sun set calc
+        var a = 0;
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.degToRad(latitude);
-        var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA));
+        var l = PrayTime.calculateLatitude(latitude,declination);
+		var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
+        // half time 
+        var hra = PrayTime.radToDeg(Math.acos(cosHRA))/2 + 1;
 
         return PrayTime.decimalToHour(tuluTime + hra * 4);
 
