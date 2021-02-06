@@ -129,7 +129,7 @@
                         document.getElementById("timezone").innerHTML = response.utcOffset;
                         document.getElementById("fullyear").innerHTML = "<a href='fullyear.htm?latitude=" + e.latlng.lat +
                             "&longitude=" + e.latlng.lng + 
-                            "&dstOffset=" + response.effectiveTimeZoneShort + 
+                            "&isDaylightSavingTime=" + response.isDaylightSavingTime + 
                             "&timezone=" + response.utcOffset + 
                             "&timezoneId=" + response.ianaTimeId + 
                             "' target='_blank'>Open</a>";

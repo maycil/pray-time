@@ -57,7 +57,7 @@
         var urlParams = new URLSearchParams(window.location.search);
         var latitude = urlParams.get('latitude');
         var longitude = urlParams.get('longitude');
-        var dstOffset = urlParams.get('dstOffset');
+        var isDaylightSavingTime = urlParams.get('isDaylightSavingTime');
         var timezone = urlParams.get('timezone');
         var timezoneId = urlParams.get('timezoneId');
 
@@ -75,8 +75,8 @@
         "<th>Declination</th>" +
         "<th>Day Length</th></tr></thead>";
         var dst = false;
-        if (timezone !== dstOffset) {
-            text = "<h4 style='color:red;'>Please consider for day light saving (DST)!</h4>" + text;
+        if (isDaylightSavingTime == "true") {
+           text = "<h4 style='color:red;'>Please consider for day light saving (DST)!</h4>" + text;
             dst = true;
         }
 
@@ -94,8 +94,8 @@
 
         var now = new Date();
         for (var i = 1; i < 366; i++) {
-            text += calculateTime(latitude, longitude, dstOffset, new Date(now.getFullYear(), 0, i));
-        }
+             text += calculateTime(latitude, longitude, timezone, new Date(now.getFullYear(), 0, i));
+		}
         text += "</table>";
         document.getElementById("timelist").innerHTML = text;
 
