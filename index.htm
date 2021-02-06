@@ -11,15 +11,23 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <style>
         #list {
-            width: 210px;
+            width: 240px;
             height: 250px;
         }
 
             #list span {
                 float: left;
-                width: 50%;
+                width: 60%;
                 height: 20px;
             }
+            
+            #list span.first {
+                float: left;
+                width: 40%;
+                height: 20px;
+            }
+            
+            
         /* Set black background color, white text and some padding */
         footer {
             background-color: #555;
@@ -59,31 +67,31 @@
 				Click for detail <a href='https://github.com/maycil/pray-time/blob/master/README.md' target='_blank'>Pray Time Calculation</a>
 				</p>
                 <div id="list" style="display:none">
-                    <span>Time</span>
+                    <span class="first">Time</span>
                     <span id="time"></span>
-                    <span>Timezone</span>
+                    <span class="first">Timezone</span>
                     <span id="timezone"></span>
-                    <span>Region</span>
+                    <span class="first">Region</span>
                     <span id="timezoneId"></span>
-                    <span>Lat/Lng</span>
+                    <span class="first">Lat/Lng</span>
                     <span id="latlng"></span>
-                    <span>Dawn Time</span>
+                    <span class="first">Dawn Time</span>
                     <span id="dawnTime"></span>
-                    <span>Fajr Begin Time</span>
+                    <span class="first">Fajr Begin Time</span>
                     <span id="fajrBeginTime"></span>
-                    <span>Fajr End Time</span>
+                    <span class="first">Fajr End Time</span>
                     <span id="fajrEndTime"></span>
-                    <span>Tulu Time</span>
+                    <span class="first">Tulu Time</span>
                     <span id="tuluTime"></span>
-                    <span>Asr Time</span>
+                    <span class="first">Asr Time</span>
                     <span id="asrTime"></span>
-                    <span>Maghrib Time</span>
+                    <span class="first">Maghrib Time</span>
                     <span id="maghribTime"></span>
-                    <span>Isha Time</span>
+                    <span class="first">Isha Time</span>
                     <span id="ishaTime"></span>
-                    <span>Isha End Time</span>
+                    <span class="first">Isha End Time</span>
                     <span id="ishaEndTime"></span>
-                    <span>Full Year Time</span>
+                    <span class="first">Full Year Time</span>
                     <span id="fullyear"></span>
                 </div>
             </div>
@@ -112,18 +120,24 @@
                 xhttp.onreadystatechange = function () {
                     if (this.readyState == 4 && this.status == 200) {
                         // Typical action to be performed when the document is ready:
-                        var response = JSON.parse(xhttp.responseText)
-                        document.getElementById("time").innerHTML = response.time;
+                        var response = JSON.parse(xhttp.responseText);
+                        document.getElementById("time").innerHTML = new Date(response.localTime).toLocaleString();
                         document.getElementById("latlng").innerHTML = e.latlng.lat.toFixed(3) + " / " +e.latlng.lng.toFixed(3)
-                        document.getElementById("timezoneId").innerHTML = response.timezoneId;
-                        document.getElementById("timezone").innerHTML = response.dstOffset;
-                        document.getElementById("fullyear").innerHTML = "<a href='fullyear.htm?latitude=" + e.latlng.lat + "&longitude=" + e.latlng.lng + "&dstOffset=" + response.dstOffset + "&timezone=" + response.gmtOffset + "&timezoneId=" + response.timezoneId + "' target='_blank'>Open</a>";
+                        document.getElementById("timezoneId").innerHTML = response.ianaTimeId;
+                        document.getElementById("timezone").innerHTML = response.utcOffset;
+                        document.getElementById("fullyear").innerHTML = "<a href='fullyear.htm?latitude=" + e.latlng.lat +
+                            "&longitude=" + e.latlng.lng + 
+                            "&dstOffset=" + response.effectiveTimeZoneShort + 
+                            "&timezone=" + response.utcOffset + 
+                            "&timezoneId=" + response.ianaTimeId + 
+                            "' target='_blank'>Open</a>";
 
-                        calculateTime(e.latlng.lat, e.latlng.lng, response.dstOffset)
+                        calculateTime(e.latlng.lat, e.latlng.lng, response.utcOffset)
                     }
                 };
-
-                xhttp.open("GET", "http://api.geonames.org/timezoneJSON?lat=" + e.latlng.lat + "&lng=" + e.latlng.lng + "&username=aycilm", true);
+                xhttp.open("GET","https://api.bigdatacloud.net/data/timezone-by-location?latitude=" + e.latlng.lat + 
+                    "&longitude=" + e.latlng.lng + 
+                    "&utcReference=0&key=34a07b71817a4482a686b4a7cfc7b345",true);
                 xhttp.send();
 
                 popup.setLatLng(e.latlng)
