@@ -96,7 +96,7 @@ var PrayTime =
         //sun set calc
         var a = 0;
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.calculateLatitude(latitude,declination);
+        var l = PrayTime.degToRad(latitude);
 		var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
         // half time 
         var hra = PrayTime.radToDeg(Math.acos(cosHRA))/2 + 1;
