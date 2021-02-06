@@ -55,10 +55,10 @@
     <script>
 
         var urlParams = new URLSearchParams(window.location.search);
-        var latitude = urlParams.get('latitude');
-        var longitude = urlParams.get('longitude');
+        var latitude = parseFloat(urlParams.get('latitude'));
+        var longitude = parseFloat(urlParams.get('longitude'));
         var isDaylightSavingTime = urlParams.get('isDaylightSavingTime');
-        var timezone = urlParams.get('timezone');
+        var timezone = parseInt(urlParams.get('timezone'));
         var timezoneId = urlParams.get('timezoneId');
 
         var text = "<table class='table table-striped'>" +
