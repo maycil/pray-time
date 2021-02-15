@@ -10,25 +10,22 @@ var PrayTime =
 
     },
 
-    sunRise: function (tuluTime, declination, latitude, elevationAngle, EoT) {
+    sunRise: function (tuluTime, declination, latitude, EoT) {
         var a = 0;
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.calculateLatitude(latitude,declination);
-		var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA)) + 1;
-        return tuluTime - hra * 4;
-
+        var l = PrayTime.calculateLatitude(latitude);
+        var hra = PrayTime.calculateHourAngle(a,d,l);
+        
+		return tuluTime - hra * 4;
     },
 
-    sunSet: function (tuluTime, declination, latitude, elevationAngle, EoT) {
+    sunSet: function (tuluTime, declination, latitude, EoT) {
         var a = 0;
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.calculateLatitude(latitude,declination);
-		var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA)) + 1;
-        return tuluTime + hra * 4;
+        var l = PrayTime.calculateLatitude(latitude);
+		var hra = PrayTime.calculateHourAngle(a,d,l);
+        
+		return tuluTime + hra * 4;
     },
 
     /*
@@ -48,27 +45,23 @@ var PrayTime =
 
     */
 
-    dawnTime: function (tuluTime, declination, latitude, elevationAngleNight) {
-  		
+    dawnTime: function (tuluTime, declination, latitude) {  		
 		var a = PrayTime.degToRad(-18);
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.calculateLatitude(latitude,declination);
-        var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA));
-        return PrayTime.decimalToHour(tuluTime - hra * 4);
+        var l = PrayTime.calculateLatitude(latitude);
+		var hra = PrayTime.calculateHourAngle(a,d,l); 
+        
+		return PrayTime.decimalToHour(tuluTime - hra * 4);
     },
 
 
-    fajrBeginTime: function (tuluTime, declination, latitude, elevationAngleNight) {
-        //calc with sunrise elevationAngle
+    fajrBeginTime: function (tuluTime, declination, latitude) {
         //sinα = sinδ * sin φ + cosδ * cos ω * cos φ 
         var a = PrayTime.degToRad(-9);
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.calculateLatitude(latitude,declination);
-		var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA));
+        var l = PrayTime.calculateLatitude(latitude);
+		var hra = PrayTime.calculateHourAngle(a,d,l);
+		
         return PrayTime.decimalToHour(tuluTime - hra * 4);
 
     },
@@ -85,16 +78,14 @@ var PrayTime =
         return tuluTime;
     },
 
-    asrTime: function (tuluTime, declination, latitude, elevationAngle) {
+    asrTime: function (tuluTime, declination, latitude) {
 
         //sun set calc
         var a = 0;
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.calculateLatitude(latitude,declination);
-		var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-        // half time 
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA))/2 + 1;
-
+        var l = PrayTime.calculateLatitude(latitude);
+		var hra = PrayTime.calculateHourAngle(a,d,l) / 2;
+		
         return PrayTime.decimalToHour(tuluTime + hra * 4);
 
     },
@@ -105,27 +96,23 @@ var PrayTime =
     },
 
 
-    ishaTime: function (tuluTime, declination, latitude, elevationAngleNight) {
+    ishaTime: function (tuluTime, declination, latitude) {
         var a = PrayTime.degToRad(-9);
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.calculateLatitude(latitude,declination);
-		var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA));
-
-        return PrayTime.decimalToHour(tuluTime + hra * 4);
+        var l = PrayTime.calculateLatitude(latitude);
+		var hra = PrayTime.calculateHourAngle(a,d,l);
+		
+		return PrayTime.decimalToHour(tuluTime + hra * 4);
     },
 
 
-    ishaEndTime: function (tuluTime, declination, latitude, elevationAngleNight) {
+    ishaEndTime: function (tuluTime, declination, latitude) {
         var a = PrayTime.degToRad(-18);
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.calculateLatitude(latitude,declination);
-		var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA));
-
-        return PrayTime.decimalToHour(tuluTime + hra * 4);
+        var l = PrayTime.calculateLatitude(latitude);
+		var hra = PrayTime.calculateHourAngle(a,d,l);
+		
+		return PrayTime.decimalToHour(tuluTime + hra * 4);
     },
 
     elevationAngle: function (latitude, declination, day) {
@@ -149,35 +136,34 @@ var PrayTime =
         return altitude;
     },
 	
-	declination: function(calculateDate){
-		
+	declination: function(calculateDate){		
 		/* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
 		var sina = 360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81);          
 		return 23.45 * Math.sin(PrayTime.degToRad(sina));
 	},
 	
-	equationofTime : function(calculateDate){
-		
+	equationofTime : function(calculateDate){		
 		//calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
 		var B = PrayTime.degToRad(360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81));
 		var eoT = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
 		return eoT; 
 	},
 	
-	calculateLatitude : function(latitude, declination){
-		/*
-		//declination is positive in summer for north, latitude 45 above is fixed!!
-		if (declination > 0 && latitude > 45) {
+	calculateLatitude : function(latitude){
+		if (latitude > 45) {
 			latitude = 90 - latitude;
 		}
 
-		//declination is negative in summer for south, latitude 45 above is fixed!!
-		if (declination < 0 && latitude < -45) {
+		if (latitude < -45) {
 			latitude = -90 - latitude;
 		}
-		*/
-		 
+		
 		return PrayTime.degToRad(latitude);
+	},
+	
+	calculateHourAngle : function(altitude, declination,latitude){
+		var cosHRA = Math.acos((Math.sin(altitude) - Math.sin(declination) * Math.sin(latitude)) / (Math.cos(declination) * Math.cos(latitude)));
+		return PrayTime.radToDeg(cosHRA);		
 	},
 
     decimalToHour: function (value) {

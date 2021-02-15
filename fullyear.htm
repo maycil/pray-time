@@ -23,8 +23,7 @@
             }
         }
     </style>
-    <script src="calc.js"></script>
-
+	<script src="calc.js"></script>
     <title>Pray Time - Full Year</title>
 </head>
 <body>
@@ -63,7 +62,6 @@
         "<th>Maghrib Time</th>" +
         "<th>Isha Time</th>" +
         "<th>Isha End Time</th>" +
-        "<th>Declination</th>" +
         "<th>Day Length</th></tr></thead>";
         var dst = false;
         if (isDaylightSavingTime == "true") {
@@ -85,25 +83,23 @@
 			
 			var declination =  PrayTime.declination(calculateDate);
 			var EoT = PrayTime.equationofTime(calculateDate);
-            //console.log("EoT ", EoT, calculateDate);
             var elevationAngle = PrayTime.elevationAngle(latitude, declination, true);
             var elevationAngleNight = PrayTime.elevationAngle(latitude, declination, false);
             var tulutime = PrayTime.tuluTime(longitude, EoT, timezone);
-            var sunset = PrayTime.sunSet(tulutime, declination, latitude, elevationAngle, EoT);
-            var sunrise = PrayTime.sunRise(tulutime, declination, latitude, elevationAngle, EoT);
+            var sunset = PrayTime.sunSet(tulutime, declination, latitude, EoT);
+            var sunrise = PrayTime.sunRise(tulutime, declination, latitude, EoT);
 
 
             return "<tr><td>" + PrayTime.formatDate(calculateDate) +
                 "</td><td>" + PrayTime.dayOfYear(calculateDate) +
-                "</td><td>" + PrayTime.dawnTime(tulutime, declination, latitude, elevationAngleNight) +
-                "</td><td>" + PrayTime.fajrBeginTime(tulutime, declination, latitude, elevationAngleNight) +
+                "</td><td>" + PrayTime.dawnTime(tulutime, declination, latitude) +
+                "</td><td>" + PrayTime.fajrBeginTime(tulutime, declination, latitude) +
                 "</td><td>" + PrayTime.fajrEndTime(sunrise) +
                 "</td><td>" + PrayTime.decimalToHour(tulutime) +
-                "</td><td>" + PrayTime.asrTime(tulutime, declination, latitude, elevationAngle) +
+                "</td><td>" + PrayTime.asrTime(tulutime, declination, latitude) +
                 "</td><td>" + PrayTime.maghribTime(sunset) +
-                "</td><td>" + PrayTime.ishaTime(tulutime, declination, latitude, elevationAngleNight) +
-                "</td><td>" + PrayTime.ishaEndTime(tulutime, declination, latitude, elevationAngleNight) +
-                "</td><td>" + declination.toFixed(3) + " e/n " + elevationAngle.toFixed(2) + " / " + elevationAngleNight.toFixed(2) +
+                "</td><td>" + PrayTime.ishaTime(tulutime, declination, latitude) +
+                "</td><td>" + PrayTime.ishaEndTime(tulutime, declination, latitude) +
                 "</td><td>" + PrayTime.decimalToHour(sunset - sunrise) +
                 "</td></tr>";
 
