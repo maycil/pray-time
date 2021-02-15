@@ -165,6 +165,7 @@ var PrayTime =
 	},
 	
 	calculateLatitude : function(latitude, declination){
+		/*
 		//declination is positive in summer for north, latitude 45 above is fixed!!
 		if (declination > 0 && latitude > 45) {
 			latitude = 90 - latitude;
@@ -174,6 +175,7 @@ var PrayTime =
 		if (declination < 0 && latitude < -45) {
 			latitude = -90 - latitude;
 		}
+		*/
 		 
 		return PrayTime.degToRad(latitude);
 	},
