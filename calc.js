@@ -11,7 +11,7 @@ var PrayTime =
     },
 
     sunRise: function (tuluTime, declination, latitude, EoT) {
-        var a = 0;
+        var a = PrayTime.degToRad(-1);
         var d = PrayTime.degToRad(declination);
         var l = PrayTime.calculateLatitude(latitude);
         var hra = PrayTime.calculateHourAngle(a,d,l);
@@ -20,7 +20,7 @@ var PrayTime =
     },
 
     sunSet: function (tuluTime, declination, latitude, EoT) {
-        var a = 0;
+        var a = PrayTime.degToRad(-1);
         var d = PrayTime.degToRad(declination);
         var l = PrayTime.calculateLatitude(latitude);
 		var hra = PrayTime.calculateHourAngle(a,d,l);
@@ -81,7 +81,7 @@ var PrayTime =
     asrTime: function (tuluTime, declination, latitude) {
 
         //sun set calc
-        var a = 0;
+        var a = PrayTime.degToRad(-1);
         var d = PrayTime.degToRad(declination);
         var l = PrayTime.calculateLatitude(latitude);
 		var hra = PrayTime.calculateHourAngle(a,d,l) / 2;
@@ -171,16 +171,25 @@ var PrayTime =
 			return "-";
         value = value / 60;
         var hour = Math.trunc(value);
-        if (hour.toString().length == 1)
-            hour = "0" + hour;
         var remain = (value - hour) * 60;
         var mninute = Math.trunc(remain);
-        if (mninute.toString().length == 1)
-            mninute = "0" + mninute;
         var seconds = ((remain - mninute) * 60).toFixed(0);
-        if (seconds.toString().length == 1)
-            seconds = "0" + seconds;
-        return hour + ":" + mninute + ":" + seconds;
+        if (seconds > 1)
+		{
+            mninute = parseInt(mninute) + 1;
+			if(minute == 60)
+			{
+				hour = parseInt(hour) + 1;
+				minute = 0;
+			}
+		}
+        if (hour.toString().length == 1)
+            hour = "0" + hour;
+       
+	   if (mninute.toString().length == 1)
+            mninute = "0" + mninute;
+        
+		return hour + ":" + mninute;
     },
 
     radToDeg: function (angleRad) {
