@@ -11,8 +11,8 @@ var PrayTime =
     },
 
     sunRise: function (tuluTime, declination, latitude, EoT) {
-        var a = PrayTime.degToRad(-1);
-        var d = PrayTime.degToRad(declination);
+        var a = PrayTime.getRadian(-1);
+        var d = PrayTime.getRadian(declination);
         var l = PrayTime.calculateLatitude(latitude);
         var hra = PrayTime.calculateHourAngle(a,d,l);
         
@@ -20,8 +20,8 @@ var PrayTime =
     },
 
     sunSet: function (tuluTime, declination, latitude, EoT) {
-        var a = PrayTime.degToRad(-1);
-        var d = PrayTime.degToRad(declination);
+        var a = PrayTime.getRadian(-1);
+        var d = PrayTime.getRadian(declination);
         var l = PrayTime.calculateLatitude(latitude);
 		var hra = PrayTime.calculateHourAngle(a,d,l);
         
@@ -46,8 +46,8 @@ var PrayTime =
     */
 
     dawnTime: function (tuluTime, declination, latitude) {  		
-		var a = PrayTime.degToRad(-18);
-        var d = PrayTime.degToRad(declination);
+		var a = PrayTime.getRadian(-18);
+        var d = PrayTime.getRadian(declination);
         var l = PrayTime.calculateLatitude(latitude);
 		var hra = PrayTime.calculateHourAngle(a,d,l); 
         
@@ -57,8 +57,8 @@ var PrayTime =
 
     fajrBeginTime: function (tuluTime, declination, latitude) {
         //sinα = sinδ * sin φ + cosδ * cos ω * cos φ 
-        var a = PrayTime.degToRad(-9);
-        var d = PrayTime.degToRad(declination);
+        var a = PrayTime.getRadian(-9);
+        var d = PrayTime.getRadian(declination);
         var l = PrayTime.calculateLatitude(latitude);
 		var hra = PrayTime.calculateHourAngle(a,d,l);
 		
@@ -81,8 +81,8 @@ var PrayTime =
     asrTime: function (tuluTime, declination, latitude) {
 
         //sun set calc
-        var a = PrayTime.degToRad(-1);
-        var d = PrayTime.degToRad(declination);
+        var a = PrayTime.getRadian(-1);
+        var d = PrayTime.getRadian(declination);
         var l = PrayTime.calculateLatitude(latitude);
 		var hra = PrayTime.calculateHourAngle(a,d,l) / 2;
 		
@@ -97,8 +97,8 @@ var PrayTime =
 
 
     ishaTime: function (tuluTime, declination, latitude) {
-        var a = PrayTime.degToRad(-9);
-        var d = PrayTime.degToRad(declination);
+        var a = PrayTime.getRadian(-9);
+        var d = PrayTime.getRadian(declination);
         var l = PrayTime.calculateLatitude(latitude);
 		var hra = PrayTime.calculateHourAngle(a,d,l);
 		
@@ -107,8 +107,8 @@ var PrayTime =
 
 
     ishaEndTime: function (tuluTime, declination, latitude) {
-        var a = PrayTime.degToRad(-18);
-        var d = PrayTime.degToRad(declination);
+        var a = PrayTime.getRadian(-18);
+        var d = PrayTime.getRadian(declination);
         var l = PrayTime.calculateLatitude(latitude);
 		var hra = PrayTime.calculateHourAngle(a,d,l);
 		
@@ -139,12 +139,12 @@ var PrayTime =
 	declination: function(calculateDate){		
 		/* +4 for (2019-2000)/4 = 4.75 (feb 29)*/
 		var sina = 360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81);          
-		return 23.45 * Math.sin(PrayTime.degToRad(sina));
+		return 23.45 * Math.sin(PrayTime.getRadian(sina));
 	},
 	
 	equationofTime : function(calculateDate){		
 		//calculate time correction  https://pveducation.org/pvcdrom/properties-of-sunlight/solar-time
-		var B = PrayTime.degToRad(360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81));
+		var B = PrayTime.getRadian(360 / 365 * (PrayTime.dayOfYear(calculateDate) - 81));
 		var eoT = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
 		return eoT; 
 	},
@@ -158,12 +158,12 @@ var PrayTime =
 			latitude = -90 - latitude;
 		}
 		
-		return PrayTime.degToRad(latitude);
+		return PrayTime.getRadian(latitude);
 	},
 	
 	calculateHourAngle : function(altitude, declination,latitude){
 		var cosHRA = Math.acos((Math.sin(altitude) - Math.sin(declination) * Math.sin(latitude)) / (Math.cos(declination) * Math.cos(latitude)));
-		return PrayTime.radToDeg(cosHRA);		
+		return PrayTime.getDegree(cosHRA);		
 	},
 
     decimalToHour: function (value) {
@@ -172,11 +172,11 @@ var PrayTime =
         value = value / 60;
         var hour = Math.trunc(value);
         var remain = (value - hour) * 60;
-        var mninute = Math.trunc(remain);
-        var seconds = ((remain - mninute) * 60).toFixed(0);
+        var minute = Math.trunc(remain);
+        var seconds = ((remain - minute) * 60).toFixed(0);
         if (seconds > 1)
 		{
-            mninute = parseInt(mninute) + 1;
+            minute = parseInt(minute) + 1;
 			if(minute == 60)
 			{
 				hour = parseInt(hour) + 1;
@@ -186,18 +186,18 @@ var PrayTime =
         if (hour.toString().length == 1)
             hour = "0" + hour;
        
-	   if (mninute.toString().length == 1)
-            mninute = "0" + mninute;
+	   if (minute.toString().length == 1)
+            minute = "0" + minute;
         
-		return hour + ":" + mninute;
+		return hour + ":" + minute;
     },
 
-    radToDeg: function (angleRad) {
-        return (180 * angleRad / Math.PI);
+    getDegree: function (radianAngle) {
+        return (180 * radianAngle / Math.PI);
     },
 
-    degToRad: function (angleDeg) {
-        return (Math.PI * angleDeg / 180);
+    getRadian: function (degreeAngle) {
+        return (Math.PI * degreeAngle / 180);
     },
 
     formatDate: function (calculateDate) {

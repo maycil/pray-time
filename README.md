@@ -31,11 +31,11 @@ Fajr begin time calculate by set the elevation angle is -9 degree.  And then the
 
 # Fajr End Time:
 
-Fajr end time calculate by set the elevation angle is zero degree.  And then the tulu time is subtracted from the calculated time.
+Fajr end time have to calculate by set the elevation angle is zero degree. But complete disappearance of the sun is achieved with -1 degrees. In order to find fajr end time, tulu time is subtracted from the calculated time.
 
-	α = 0;
+	α = -1;
     cos ω = (sinα - sinδ * sin φ) / (cosδ * cos φ)  
-	asrTime =  tuluTime -  acos(ω) * 4
+	fajrEndTime =  tuluTime -  acos(ω) * 4
 
 # Tulu Time:
 Solar noon for a given location is found from the longitude (in degrees, positive to the east of the Prime Meridian) and the equation of time (in minutes):
@@ -53,17 +53,17 @@ The Equation Time Calculation can be approximated by the following formula:
 
 # Asr Time
 
-Asr time calculate by halfing the elevation angle.  And then tulu time is summed with calculated time.
+Asr time is in the middle of noon and maghrib. And to find asr time, tulu time is summed with calculated time.
 	
-	α = elevationAngle / 2;
+	α = -1;
     cos ω = (sinα - sinδ * sin φ) / (cosδ * cos φ)  
-	asrTime =  tuluTime +  acos(ω) * 4	 
+	asrTime =  tuluTime +  acos(ω) / 2 * 4	 
 
 # Maghrib Time:
 
-Maghrib time calculate by set the elevation angle is zero degree.  And then tulu time is summed with calculated time.
+Maghrib time calculate by set the elevation angle is zero degree. But complete disappearance of the sun is achieved with -1 degrees. In order to find maghrib time, tulu time is summed with calculated time.
 
-	α = 0;
+	α = -1;
     cos ω = (sinα - sinδ * sin φ) / (cosδ * cos φ)  
 	asrTime =  tuluTime +  acos(ω) * 4
 	 

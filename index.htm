@@ -12,21 +12,20 @@
     <style>
         #list {
             width: 240px;
-            height: 250px;
+            height: 290px;
         }
 
-            #list span {
-                float: left;
-                width: 60%;
-                height: 20px;
+            #prayTable tr td {
+                line-height: 1;
+                padding: 5px;
             }
             
-            #list span.first {
-                float: left;
-                width: 40%;
-                height: 20px;
-            }
-            
+			.leaflet-container a.leaflet-popup-close-button{
+				font-size : 22px;
+				height:22px;
+				width:26px;
+				margin:10px;
+			}
             
         /* Set black background color, white text and some padding */
         footer {
@@ -67,32 +66,21 @@
 				Click for detail <a href='https://github.com/maycil/pray-time/blob/master/README.md' target='_blank'>Pray Time Calculation</a>
 				</p>
                 <div id="list" style="display:none">
-                    <span class="first">Time</span>
-                    <span id="time"></span>
-                    <span class="first">Timezone</span>
-                    <span id="timezone"></span>
-                    <span class="first">Region</span>
-                    <span id="timezoneId"></span>
-                    <span class="first">Lat/Lng</span>
-                    <span id="latlng"></span>
-                    <span class="first">Dawn Time</span>
-                    <span id="dawnTime"></span>
-                    <span class="first">Fajr Begin Time</span>
-                    <span id="fajrBeginTime"></span>
-                    <span class="first">Fajr End Time</span>
-                    <span id="fajrEndTime"></span>
-                    <span class="first">Tulu Time</span>
-                    <span id="tuluTime"></span>
-                    <span class="first">Asr Time</span>
-                    <span id="asrTime"></span>
-                    <span class="first">Maghrib Time</span>
-                    <span id="maghribTime"></span>
-                    <span class="first">Isha Time</span>
-                    <span id="ishaTime"></span>
-                    <span class="first">Isha End Time</span>
-                    <span id="ishaEndTime"></span>
-                    <span class="first">Full Year Time</span>
-                    <span id="fullyear"></span>
+				<table class='table table-striped' id="prayTable"> 
+					<tr><td>Time</td><td id="time"></td></tr>
+                	<tr><td>Timezone</td><td id="timezone"></td></tr>
+                	<tr><td>Region</td><td id="timezoneId"></td></tr>
+                	<tr><td>Lat/Lng</td><td id="latlng"></td></tr>
+                	<tr><td>Dawn Time</td><td id="dawnTime"></td></tr>
+                	<tr><td>Fajr Begin Time</td><td id="fajrBeginTime"></td></tr>
+                	<tr><td>Fajr End Time</td><td id="fajrEndTime"></td></tr>
+                	<tr><td>Tulu Time</td><td id="tuluTime"></td></tr>
+                	<tr><td>Asr Time</td><td id="asrTime"></td></tr>
+                	<tr><td>Maghrib Time</td><td id="maghribTime"></td></tr>
+                	<tr><td>Isha Time</td><td id="ishaTime"></td></tr>
+                	<tr><td>Isha End Time</td><td id="ishaEndTime"></td></tr>
+                	<tr><td colspan="2" id="fullyear"></td></tr>
+				</table>	
                 </div>
             </div>
         </div>
@@ -132,7 +120,7 @@
                             "&isDaylightSavingTime=" + response.isDaylightSavingTime + 
                             "&timezone=" + response.utcOffset + 
                             "&timezoneId=" + response.ianaTimeId + 
-                            "' target='_blank'>Open</a>";
+                            "' target='_blank'>Open Full Year Pray Time</a>";
 
                         calculateTime(e.latlng.lat, e.latlng.lng, response.utcOffset)
                     }
