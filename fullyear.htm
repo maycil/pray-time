@@ -70,6 +70,7 @@
         var now = new Date();
 		var month = 0; 
 		if(dayCount != 365){
+			month = now.getMonth();
 			dayCount = new Date(now.getFullYear(), month+1, 0).getDate();
         }
 		else {
