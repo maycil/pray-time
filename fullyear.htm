@@ -3,11 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <meta name="keywords" content="Pray Time Application V 0.2.1" />
-    <meta name="description" content="Experimental Pray Time Application V 0.2.1" />
+    <meta name="keywords" content="Pray Time Application V 0.3.1" />
+    <meta name="description" content="Pray Time Application V 0.3.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
-
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <style>
         /* Set black background color, white text and some padding */
@@ -24,14 +22,14 @@
         }
     </style>
 	<script src="calc.js"></script>
-    <title>Pray Time - Full Year</title>
+    <title>Pray Time </title>
 </head>
 <body>
 
     <div class="container-fluid text-center">
         <div class="row content">
             <div class="col-sm-12 text-left">
-                <h2>Pray time - Full Year</h2>
+                <h3>Pray Time</h3>
 
                 <b>Information</b>
                 <span id="timezoneId"></span> &nbsp;&nbsp; <span id="timezone"></span>
@@ -51,9 +49,9 @@
         var isDaylightSavingTime = urlParams.get('isDaylightSavingTime');
         var timezone = parseInt(urlParams.get('timezone'));
         var timezoneId = urlParams.get('timezoneId'); 
+        var dayCount = urlParams.get('dayCount'); 
         var text = "<table class='table table-striped'>" +
-        "<thead class='thead-light'><tr><th>Date</th>" +
-        "<th>Day Of Year</th>" +
+        "<thead class='thead-light'><tr><th>Date</th>" + 
         "<th>Dawn Time</th>" +
         "<th>Fajr Begin Time</th>" +
         "<th>Fajr End Time</th>" +
@@ -70,8 +68,15 @@
         }
 
         var now = new Date();
-        for (var i = 1; i < 366; i++) {
-            text += calculateTime(latitude, longitude, timezone, new Date(now.getFullYear(), 0, i));
+		var month = 0; 
+		if(dayCount != 365){
+			dayCount = new Date(now.getFullYear(), month+1, 0).getDate();
+        }
+		else {
+			dayCount = now.getFullYear() % 4 == 0 ? 366 : 365;
+		}
+		for (var i = 1; i <= dayCount; i++) {
+            text += calculateTime(latitude, longitude, timezone, new Date(now.getFullYear(), month, i));
         }
         text += "</table>";
         document.getElementById("timelist").innerHTML = text;
@@ -91,13 +96,12 @@
 
 
             return "<tr><td>" + PrayTime.formatDate(calculateDate) +
-                "</td><td>" + PrayTime.dayOfYear(calculateDate) +
                 "</td><td>" + PrayTime.dawnTime(tulutime, declination, latitude) +
                 "</td><td>" + PrayTime.fajrBeginTime(tulutime, declination, latitude) +
-                "</td><td>" + PrayTime.fajrEndTime(sunrise) +
+                "</td><td><b>" + PrayTime.fajrEndTime(sunrise) + "</b>" +
                 "</td><td>" + PrayTime.decimalToHour(tulutime) +
                 "</td><td>" + PrayTime.asrTime(tulutime, declination, latitude) +
-                "</td><td>" + PrayTime.maghribTime(sunset) +
+                "</td><td><b>" + PrayTime.maghribTime(sunset) + "</b>" +
                 "</td><td>" + PrayTime.ishaTime(tulutime, declination, latitude) +
                 "</td><td>" + PrayTime.ishaEndTime(tulutime, declination, latitude) +
                 "</td><td>" + PrayTime.decimalToHour(sunset - sunrise) +

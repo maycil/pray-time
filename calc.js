@@ -81,10 +81,11 @@ var PrayTime =
     asrTime: function (tuluTime, declination, latitude) {
 
         //sun set calc
-        var a = PrayTime.getRadian(-1);
+		//var a = PrayTime.getRadian(-1);
         var d = PrayTime.getRadian(declination);
         var l = PrayTime.calculateLatitude(latitude);
-		var hra = PrayTime.calculateHourAngle(a,d,l) / 2;
+        var a = Math.atan(1 / (1 + Math.tan(l - d)));
+		var hra = PrayTime.calculateHourAngle(a,d,l);
 		
         return PrayTime.decimalToHour(tuluTime + hra * 4);
 

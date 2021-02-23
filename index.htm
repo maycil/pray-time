@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <meta name="keywords" content="Pray Time Application V 0.2.1" />
-    <meta name="description" content="Experimental Pray Time Application V 0.2.1" />
+    <meta name="keywords" content="Pray Time Application V 0.3.1" />
+    <meta name="description" content="Pray Time Application V 0.3.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="Content-Security-Policy" content="script-src *  'unsafe-inline' http://api.geonames.org;">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="*" />
@@ -79,7 +79,7 @@
                 	<tr><td>Maghrib Time</td><td id="maghribTime"></td></tr>
                 	<tr><td>Isha Time</td><td id="ishaTime"></td></tr>
                 	<tr><td>Isha End Time</td><td id="ishaEndTime"></td></tr>
-                	<tr><td colspan="2" id="fullyear"></td></tr>
+                	<tr><td>Pray Time</td><td id="fullyear"></td></tr>
 				</table>	
                 </div>
             </div>
@@ -119,8 +119,14 @@
                             "&longitude=" + e.latlng.lng + 
                             "&isDaylightSavingTime=" + response.isDaylightSavingTime + 
                             "&timezone=" + response.utcOffset + 
-                            "&timezoneId=" + response.ianaTimeId + 
-                            "' target='_blank'>Open Full Year Pray Time</a>";
+                            "&timezoneId=" + response.ianaTimeId +
+                            "&dayCount=30' target='_blank'>Full Month</a>";
+					document.getElementById("fullyear").innerHTML += "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='fullyear.htm?latitude=" + e.latlng.lat +
+                            "&longitude=" + e.latlng.lng + 
+                            "&isDaylightSavingTime=" + response.isDaylightSavingTime + 
+                            "&timezone=" + response.utcOffset + 
+                            "&timezoneId=" + response.ianaTimeId +
+                            "&dayCount=365' target='_blank'>Full Year</a>";
 
                         calculateTime(e.latlng.lat, e.latlng.lng, response.utcOffset)
                     }
