@@ -11,7 +11,7 @@ var PrayTime =
     },
 
     sunRise: function (tuluTime, declination, latitude, elevationAngle, EoT) {
-        var a = 0;
+        var a = PrayTime.degToRad(-0.5);;
         var d = PrayTime.degToRad(declination);
         var l = PrayTime.degToRad(latitude);
         var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
@@ -22,7 +22,7 @@ var PrayTime =
     },
 
     sunSet: function (tuluTime, declination, latitude, elevationAngle, EoT) {
-        var a = 0;
+        var a = PrayTime.degToRad(-0.5);
         var d = PrayTime.degToRad(declination);
         var l = PrayTime.degToRad(latitude);
         var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
@@ -53,14 +53,6 @@ var PrayTime =
         var d = PrayTime.degToRad(declination);
         var l = PrayTime.degToRad(latitude);
         var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-
-        //calc with sunrise elevationAngle
-        //sinα = sinδ * sin φ + cosδ * cos ω * cos φ 
-        if (cosHRA > 1 || cosHRA < -1) {
-            var sunriseHRA = PrayTime.sunRise(tuluTime, declination);
-            return PrayTime.decimalToHour(sunriseHRA - 4 * 18);
-        }
-
 
         var hra = PrayTime.radToDeg(Math.acos(cosHRA));
         return PrayTime.decimalToHour(tuluTime - hra * 4);
@@ -93,16 +85,13 @@ var PrayTime =
     },
 
     asrTime: function (tuluTime, declination, latitude, elevationAngle) {
-        //sun set calc
-        var a = 0;
-        var d = PrayTime.degToRad(declination);
-        var l = PrayTime.degToRad(latitude);
-		var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
-        // half time 
-        var hra = PrayTime.radToDeg(Math.acos(cosHRA))/2 + 1;
-
+        var d = PrayTime.getRadian(declination);
+        var l = PrayTime.calculateLatitude(latitude);
+        //altitude calc
+        var a = Math.atan(1 / (1 + Math.tan(l - d)));
+        var hra = PrayTime.calculateHourAngle(a,d,l);
+		
         return PrayTime.decimalToHour(tuluTime + hra * 4);
-
     },
 
 
