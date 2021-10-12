@@ -86,9 +86,9 @@ var PrayTime =
 
     asrTime: function (tuluTime, declination, latitude, elevationAngle) {
         var d = PrayTime.degToRad(declination);
-        var l = PrayTime.degToRad(latitude);
+        var l = Math.abs(PrayTime.degToRad(latitude));
         //altitude calc
-        var a = Math.atan(1 / (1 + Math.tan(l - d)));
+	   var a = Math.atan(1 / (1 + Math.tan(l - d)));
         var cosHRA = (Math.sin(a) - Math.sin(d) * Math.sin(l)) / (Math.cos(d) * Math.cos(l));
         var hra = PrayTime.radToDeg(Math.acos(cosHRA));
 		
